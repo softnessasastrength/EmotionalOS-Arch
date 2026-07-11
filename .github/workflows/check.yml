@@ -1,0 +1,46 @@
+name: Validate ArchISO source
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate source structure
+        run: make check
+
+  arch-build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+      options: --privileged
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed git archiso rsync make python
+      - uses: actions/checkout@v4
+      - name: Validate source
+        run: make check
+      - name: Build ISO
+        run: make build
+      - name: Inspect output
+        run: |
+          iso="$(find build/out -maxdepth 1 -name '*.iso' -print -quit)"
+          test -n "$iso"
+          test -s "$iso"
+          sha256sum -c "$iso.sha256"
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: emotionalos-arch-iso
+          path: |
+            build/out/*.iso
+            build/out/*.sha256
+          if-no-files-found: error
+          retention-days: 7

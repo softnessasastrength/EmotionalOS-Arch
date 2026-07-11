@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Install EmotionalOS Arch
+Comment=Launch the calm text-based installer frontend
+Exec=konsole -e sudo emotionalos-install
+Icon=system-software-install
+Terminal=false
+Categories=System;
