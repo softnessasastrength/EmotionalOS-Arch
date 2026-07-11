@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import curses
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+TITLE = "EmotionalOS Arch Installer"
+
+
+def run_command(stdscr: curses.window, command: list[str]) -> int:
+    curses.def_prog_mode()
+    curses.endwin()
+    try:
+        return subprocess.call(command)
+    finally:
+        curses.reset_prog_mode()
+        stdscr.refresh()
+
+
+def draw(stdscr: curses.window, selected: int) -> None:
+    stdscr.erase()
+    height, width = stdscr.getmaxyx()
+    lines = [
+        TITLE,
+        "A calm frontend to Arch Linux's maintained installer.",
+        "",
+        "This proof of concept delegates partitioning and installation to archinstall.",
+        "Review every disk choice carefully. Back up important data first.",
+        "",
+    ]
+    options = [
+        ("Start guided installation", "Launch archinstall's guided TUI"),
+        ("Open a shell", "Inspect networking, disks, or logs manually"),
+        ("Exit", "Return to the live desktop"),
+    ]
+    row = 2
+    for line in lines:
+        stdscr.addnstr(row, 2, line, max(1, width - 4))
+        row += 1
+    for index, (label, description) in enumerate(options):
+        marker = ">" if index == selected else " "
+        attr = curses.A_REVERSE if index == selected else curses.A_NORMAL
+        stdscr.addnstr(row, 4, f"{marker} {label}", max(1, width - 8), attr)
+        row += 1
+        stdscr.addnstr(row, 8, description, max(1, width - 12))
+        row += 2
+    footer = "Arrows/j/k move • Enter selects • q exits"
+    stdscr.addnstr(max(0, height - 2), 2, footer, max(1, width - 4), curses.A_DIM)
+    stdscr.refresh()
+
+
+def app(stdscr: curses.window) -> int:
+    curses.curs_set(0)
+    stdscr.keypad(True)
+    selected = 0
+    while True:
+        draw(stdscr, selected)
+        key = stdscr.getch()
+        if key in (ord("q"), 27):
+            return 0
+        if key in (curses.KEY_UP, ord("k")):
+            selected = (selected - 1) % 3
+        elif key in (curses.KEY_DOWN, ord("j")):
+            selected = (selected + 1) % 3
+        elif key in (10, 13, curses.KEY_ENTER):
+            if selected == 0:
+                if not shutil.which("archinstall"):
+                    raise RuntimeError("archinstall is not installed in this live image")
+                run_command(stdscr, ["archinstall"])
+            elif selected == 1:
+                run_command(stdscr, [os.environ.get("SHELL", "/bin/bash")])
+            else:
+                return 0
+
+
+def main() -> int:
+    if "--help" in sys.argv:
+        print("Usage: emotionalos-install\nLaunches a calm frontend to the official archinstall guided installer.")
+        return 0
+    if os.geteuid() != 0:
+        print("error: run with sudo", file=sys.stderr)
+        return 1
+    return curses.wrapper(app)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
