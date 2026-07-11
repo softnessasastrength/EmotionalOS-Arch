@@ -8,6 +8,20 @@ systemctl enable NetworkManager.service
 systemctl enable sddm.service
 systemctl set-default graphical.target
 
+# Create a disposable live-session user. The installed system's identity is
+# created independently by archinstall.
+useradd -m -G wheel,audio,video,storage -s /bin/bash emotionalos
+passwd -d emotionalos
+printf '%%wheel ALL=(ALL:ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/10-live-session
+chmod 0440 /etc/sudoers.d/10-live-session
+install -d -m0755 /etc/sddm.conf.d
+cat > /etc/sddm.conf.d/emotionalos-live.conf <<'EOF'
+[Autologin]
+User=emotionalos
+Session=plasma.desktop
+Relogin=true
+EOF
+
 install -d -m0755 /etc/emotionalos /etc/skel/.config
 cat > /etc/emotionalos/release <<'EOF'
 NAME="EmotionalOS Arch"
@@ -26,6 +40,8 @@ Name=EmotionalOS
 [KDE]
 SingleClick=false
 EOF
+cp -a /etc/skel/. /home/emotionalos/
+chown -R emotionalos:emotionalos /home/emotionalos
 
 # Build yay from its upstream source as an unprivileged user.
 useradd -m -s /bin/bash builduser
@@ -51,7 +67,7 @@ pacman -Rns --noconfirm go base-devel || true
 rm -rf /home/builduser /tmp/healing-suite /etc/sudoers.d/90-emotionalos-build
 userdel builduser || true
 
-# Friendly live-session entrypoints.
+# Friendly live-session entrypoint.
 cat > /usr/local/bin/emotionalos-installer <<'EOF'
 #!/usr/bin/env bash
 exec sudo emotionalos-install "$@"
