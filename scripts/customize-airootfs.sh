@@ -22,11 +22,12 @@ Session=plasma.desktop
 Relogin=true
 EOF
 
-install -d -m0755 /etc/emotionalos /etc/skel/.config
+install -d -m0755 /etc/emotionalos /etc/skel/.config /etc/skel/.config/autostart
 cat > /etc/emotionalos/release <<'EOF'
 NAME="EmotionalOS Arch"
 BASE="Arch Linux"
 DESKTOP="KDE Plasma"
+THEME="Softness as Strength"
 INSTALLER="EmotionalOS TUI + archinstall"
 HEALING_SUITE="included"
 STATUS="proof-of-concept"
@@ -34,12 +35,30 @@ EOF
 
 cat > /etc/skel/.config/kdeglobals <<'EOF'
 [General]
-ColorScheme=BreezeDark
+ColorScheme=SoftnessAsStrength
 Name=EmotionalOS
 
 [KDE]
 SingleClick=false
 EOF
+
+cat > /usr/local/bin/emotionalos-apply-theme <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+plasma-apply-colorscheme SoftnessAsStrength >/dev/null 2>&1 || true
+plasma-apply-wallpaperimage /usr/share/wallpapers/SoftnessAsStrength/contents/images/1920x1080.svg >/dev/null 2>&1 || true
+rm -f "$HOME/.config/autostart/emotionalos-theme.desktop"
+EOF
+chmod 0755 /usr/local/bin/emotionalos-apply-theme
+cat > /etc/skel/.config/autostart/emotionalos-theme.desktop <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Apply EmotionalOS theme
+Exec=/usr/local/bin/emotionalos-apply-theme
+OnlyShowIn=KDE;
+X-KDE-autostart-phase=2
+EOF
+
 cp -a /etc/skel/. /home/emotionalos/
 chown -R emotionalos:emotionalos /home/emotionalos
 
