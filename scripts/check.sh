@@ -3,7 +3,7 @@ set -euo pipefail
 
 bash -n scripts/*.sh
 python -m py_compile installer/emotionalos-install
-installer/emotionalos-install --help >/dev/null
+python installer/emotionalos-install --help >/dev/null
 for required in archinstall plasma-desktop sddm networkmanager pipewire libreoffice-fresh okular; do
   grep -Fxq "$required" profile/packages.x86_64 || {
     echo "missing required package: $required" >&2
