@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#17140f"/>
+  <circle cx="1480" cy="-80" r="620" fill="#221d16"/>
+  <circle cx="1640" cy="920" r="430" fill="#3a3226" opacity="0.55"/>
+  <path d="M0 910 C420 770 660 1030 1120 860 C1450 738 1680 730 1920 800 L1920 1080 L0 1080 Z" fill="#221d16"/>
+  <path d="M0 958 C430 820 710 1068 1190 900 C1510 788 1730 790 1920 846" fill="none" stroke="#b5602c" stroke-width="4" opacity="0.88"/>
+  <text x="120" y="180" fill="#f6efe2" font-family="Georgia, serif" font-size="72">softness<tspan fill="#d68a52">as</tspan>strength</text>
+  <text x="124" y="236" fill="#d9cbab" font-family="sans-serif" font-size="24" letter-spacing="5">EMOTIONALOS</text>
+</svg>
