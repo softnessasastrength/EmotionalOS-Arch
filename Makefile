@@ -11,13 +11,13 @@ help:
 	  '  make clean       Remove generated build output'
 
 check:
-	./scripts/check.sh
+	bash scripts/check.sh
 
 build: check
-	./scripts/build-iso.sh
+	bash scripts/build-iso.sh
 
 test:
-	./scripts/test-qemu.sh
+	bash scripts/test-qemu.sh
 
 clean:
 	rm -rf build
